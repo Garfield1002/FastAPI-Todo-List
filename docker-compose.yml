@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  redis-todo:
+    container_name: redis-todo
+    image: redis:latest
+    restart: always
+    hostname: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel debug
+    volumes:
+      - cache:/data
+
+  todo:
+    container_name: todo-api
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload --log-level debug
+    volumes:
+      - .:/source/
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis-todo
+
+volumes:
+  cache:
+    driver: local
